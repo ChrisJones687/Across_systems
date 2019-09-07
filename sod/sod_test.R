@@ -64,7 +64,7 @@ sd_natural_distance_scale <- 4
 number_of_cores <- 11
 
 infected_file <- "H:/My Drive/EEID/Sudden Oak Death/inf_2001.tif"
-host_file <- "H:/My Drive/EEID/Sudden Oak Death/inf_2001.tif"
+host_file <- "H:/My Drive/EEID/Sudden Oak Death/lide_300m_median_2001.tif"
 total_plants_file <- "H:/My Drive/EEID/Sudden Oak Death/lemma_max300m.tif"
 temperature_file <- ""
 temperature_coefficient_file <- "H:/My Drive/EEID/Sudden Oak Death/weather_coef_2002_2005.tif"

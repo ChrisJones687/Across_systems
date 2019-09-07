@@ -1,6 +1,8 @@
 library(raster)
 library(sp)
 library(rgdal)
+library(dplyr)
+library(fuzzyjoin)
 fmd <- read.csv("H:/My Drive/EEID/Foot and Mouth Disease/FMD dummy.csv")
 
 nlcd2016 <- raster("H:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
@@ -36,6 +38,11 @@ colorado_nlcd_300m <- raster("H:/My Drive/EEID/Foot and Mouth Disease/colorado_p
 COcounties <- spTransform(COcounties, CRSobj = crs(colorado_nlcd_300m))
 COcounties$area_of_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
 # COcounties_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
+writeOGR(COcounties, "H:/My Drive/EEID/Foot and Mouth Disease/colorado_counties_pasturecattle.shp")
 colorado_cattle <- read.csv("H:/My Drive/EEID/Foot and Mouth Disease/colorado.csv")
 names(colorado_cattle)[1] <- "NAME"
-COcounties <- merge(COcounties, colorado_cattle, by = 'NAME')
+COcounties <- COcounties[order(COcounties$NAME),]
+COcounties2 <- left_join(COcounties@data, colorado_cattle, by = 'NAME')
+COcounties$cattle <- colorado_cattle$cattle
+COcounties$NAME <- as.character(COcounties$NAME)
+colorado_cattle$NAME <- as.character(colorado_cattle$NAME)
