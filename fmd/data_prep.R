@@ -46,3 +46,7 @@ COcounties2 <- left_join(COcounties@data, colorado_cattle, by = 'NAME')
 COcounties$cattle <- colorado_cattle$cattle
 COcounties$NAME <- as.character(COcounties$NAME)
 colorado_cattle$NAME <- as.character(colorado_cattle$NAME)
+
+COcounties$cattleperarea <- COcounties$cattle/COcounties$area_of_pasture
+COcounties$cattleperarea
+plot(colorado_nlcd)
