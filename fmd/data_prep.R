@@ -32,6 +32,7 @@ writeRaster(colorado_nlcd_300m, "H:/My Drive/EEID/Foot and Mouth Disease/colorad
 ### Colorado counties
 counties <- readOGR("H:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_counties.shp")
 COcounties <- counties[counties$STATE_NAME == 'Colorado',]
+colorado_nlcd_300m <- raster("H:/My Drive/EEID/Foot and Mouth Disease/colorado_pasture_300m.tif")
 COcounties <- spTransform(COcounties, CRSobj = crs(colorado_nlcd_300m))
 COcounties$area_of_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
 # COcounties_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
