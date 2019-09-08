@@ -1,3 +1,4 @@
+### Data preparation for state cattle data at the county level ###
 library(raster)
 library(sp)
 library(rgdal)
@@ -48,20 +49,36 @@ COcounties$NAME <- as.character(COcounties$NAME)
 colorado_cattle$NAME <- as.character(colorado_cattle$NAME)
 COcounties2 <- left_join(COcounties@data, colorado_cattle, by = 'NAME')
 
+# Distribute cattle across the county area
 COcounties$cattle <- as.numeric(COcounties$cattle)
 COcounties$area_of_pasture <- as.numeric(COcounties$area_of_pasture)
 COcounties$cattleperarea <- COcounties$cattle/COcounties$area_of_pasture
-# average number of cattle in 30 x 30 m of pasture/grassland in the county
+# Average number of cattle in 30 x 30 m of pasture/grassland in the county
 COcounties$cattleperarea
 plot(colorado_nlcd_300m)
 plot(COcounties, add = TRUE)
 
+# Extract the values for the number of cattle for each county
 for (i in 1:64) {
 ex <- extract(colorado_nlcd_300m, COcounties[i,], cellnumbers = TRUE)
 ex <- data.frame(ex)
 ex <- ex$cell
-colorado_nlcd_300m[ex] <- colorado_nlcd_300m[ex]*COcounties$cattleperarea[i]
+colorado_nlcd_300m[ex] <- ceiling(colorado_nlcd_300m[ex]*COcounties$cattleperarea[i]*100)
 }
-plot(colorado_nlcd_300m)
 colorado_nlcd_300m[colorado_nlcd_300m==0] <- NA
+colorado_nlcd_300m <- mask(colorado_nlcd_300m, colorado)
 plot(colorado_nlcd_300m)
+
+# Write out host, total hosts, and infected files
+writeRaster(colorado_nlcd_300m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif")
+colorado_nlcd_300m[colorado_nlcd_300m >=0] <- maxValue(colorado_nlcd_300m)
+writeRaster(colorado_nlcd_300m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif")
+host <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif")
+host[host==27]
+infected <- host
+infected[infected<27] <- 0
+infected[infected==27] <- 1
+infected[infected==0] <- NA
+infected[infected ==1]
+plot(infected)
+writeRaster(infected, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/infected.tif")
