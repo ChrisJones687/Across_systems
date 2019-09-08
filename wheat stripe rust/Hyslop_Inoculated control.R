@@ -1,8 +1,9 @@
 library(doParallel)
 library(raster)
-infected_file <- "C:/Users/cmjone25/Desktop/Across_systems/wheat stripe rust/Hyslop/Hyslop_infected.tif"
-host_file <- "C:/Users/cmjone25/Desktop//Across_systems/wheat stripe rust/Hyslop/Hyslop_host.tif"
-total_plants_file <- "C:/Users/cmjone25/Desktop//Across_systems/wheat stripe rust/Hyslop/Hyslop_total.tif"
+
+infected_file <- "H:/My Drive/EEID/Wheat Stripe Rust/Hyslop/Hyslop_infected.tif"
+host_file <- "H:/My Drive/EEID/Wheat Stripe Rust/Hyslop/Hyslop_host.tif"
+total_plants_file <- "H:/My Drive/EEID/Wheat Stripe Rust/Hyslop/Hyslop_total.tif"
 temperature_file <- ""
 temperature_coefficient_file <- ""
 precipitation_coefficient_file <-""

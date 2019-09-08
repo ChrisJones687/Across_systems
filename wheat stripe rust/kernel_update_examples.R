@@ -2,6 +2,7 @@
 
 library(PoPS)
 library(raster)
+library(sp)
 
 infected_file <- "H:/Shared drives/SHIC Projects/test_data/inf_2001.tif"
 host_file <- "H:/Shared drives/SHIC Projects/test_data/lide_300m_median_2001.tif"

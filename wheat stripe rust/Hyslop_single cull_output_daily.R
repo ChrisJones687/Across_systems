@@ -19,7 +19,7 @@ lethal_temperature <- 0
 lethal_temperature_month <- 1
 random_seed <- 42
 reproductive_rate <- 0.30
-treatments_file <- "C:/Users/bhimc/OneDrive/Desktop/Oregon State University/Modeling works_EEID/Across_systems/wheat stripe rust/singlecull_treat.tif"
+treatments_file <- "C:/Users/bhimc/OneDrive/Desktop/Oregon State University/Modeling works_EEID/Across_systems/wheat stripe rust/Hyslop/singlecull_treat.tif"
 treatment_years <- c(1964)
 treatment_month <- 1
 treatment_method <- "ratio"
