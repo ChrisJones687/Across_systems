@@ -1,5 +1,6 @@
 library(doParallel)
 library(raster)
+library(ggplot2)
 infected_file <- "C:/Users/cmjone25/Desktop/Across_systems/wheat stripe rust/Hyslop/Hyslop_infected.tif"
 host_file <- "C:/Users/cmjone25/Desktop//Across_systems/wheat stripe rust/Hyslop/Hyslop_host.tif"
 total_plants_file <- "C:/Users/cmjone25/Desktop//Across_systems/wheat stripe rust/Hyslop/Hyslop_total.tif"
@@ -97,4 +98,9 @@ for (i in 1:ncol(probability_end)) {
   data$disease_severity_sd[i] <- sd(probability_end[seq(1,nrow(probability_end),1), i])
 }
 
-plot(data$distance, data$disease_severity)
+p <- ggplot(data, aes(x=distance, y=disease_severity)) + 
+  geom_line() +
+  geom_point()+
+  geom_errorbar(aes(ymin=disease_severity-disease_severity_sd, ymax=disease_severity+disease_severity_sd), width=.2,
+                position=position_dodge(0.05))
+p
