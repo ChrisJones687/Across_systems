@@ -4,8 +4,11 @@ library(sp)
 library(rgdal)
 library(dplyr)
 library(rinat)
+library(ebirdst)
+library(auk)
 wnv <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/west_nile_california.csv")
 wnv[is.na(wnv)] <- 0
+
 ### California counties
 ## read in data
 counties <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/us_lower_48_counties.shp")
@@ -37,8 +40,7 @@ CAcounties15 <- spTransform(CAcounties15, CRSobj = crs(california_nlcd_3000m))
 CAcounties14 <- spTransform(CAcounties14, CRSobj = crs(california_nlcd_3000m))
 CAcounties13 <- spTransform(CAcounties13, CRSobj = crs(california_nlcd_3000m))
 
-## HUMANS
-
+## HUMANS (infected)
 ## call CA county data for humans infected by year
 CAcounties18_humans <- CAcounties18[,names(CAcounties18)[9]]
 CAcounties17_humans <- CAcounties17[,names(CAcounties17)[9]]
@@ -53,7 +55,6 @@ humans16 <- rasterize(CAcounties16_humans, california_nlcd_3000m, field = "human
 humans15 <- rasterize(CAcounties15_humans, california_nlcd_3000m, field = "human", fun = 'last')
 humans14 <- rasterize(CAcounties14_humans, california_nlcd_3000m, field = "human", fun = 'last')
 humans13 <- rasterize(CAcounties13_humans, california_nlcd_3000m, field = "human", fun = 'last')
-
 ## randomly assign infected humans to a given number of cells in a county
 for (i in 1:nrow(CAcounties)) {
   ex <- extract(humans18, CAcounties[i,], cellnumbers = TRUE)
@@ -66,8 +67,29 @@ for (i in 1:nrow(CAcounties)) {
 plot(humans18)
 plot(CAcounties, add = TRUE)
 
-## MOSQUITOES (infected)
+## HUMANS (total population)
+total_humans <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/humanpopulationcalifornia.csv")
+total_humans <- total_humans[,1:2]
+total_humans$NAME <- as.character(total_humans$NAME)
+CAcounties$NAME <- as.character(CAcounties$NAME)
+total_humans$Population <- as.numeric(total_humans$Population)
+CAcounties <- CAcounties[order(CAcounties$NAME),]
+total_humans <- total_humans[order(total_humans$NAME),]
+#humans_CAcounties <- merge(CAcounties, total_humans$Population, by = "NAME")
+CAcounties$Population <- total_humans$Population
+## human total population raster
+total_humans_raster <- rasterize(CAcounties, california_nlcd_3000m, field = "Population", fun = 'last')
+## randomly assign total humans to a given number of cells in a county
+for (i in 1:nrow(CAcounties)) {
+  ex <- extract(total_humans_raster, CAcounties[i,], cellnumbers = TRUE)
+  ex <- data.frame(ex)
+  ex <- ex$cell
+  total_humans_raster[ex] <- ceiling(CAcounties$Population[i]/length(ex))
+}
+total_humans_raster <- mask(total_humans_raster, california)
+plot(total_humans_raster)
 
+## MOSQUITOES (infected)
 ## call CA county data for mosquitoes infected by year
 CAcounties18_mosquitoes <- CAcounties18[,names(CAcounties18)[12]]
 CAcounties17_mosquitoes <- CAcounties17[,names(CAcounties17)[12]]
@@ -82,7 +104,6 @@ mosquitoes16 <- rasterize(CAcounties16_mosquitoes, california_nlcd_3000m, field 
 mosquitoes15 <- rasterize(CAcounties15_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
 mosquitoes14 <- rasterize(CAcounties14_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
 mosquitoes13 <- rasterize(CAcounties13_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-
 ## randomly assign infected mosquitoes to a given number of cells in a county
 for (i in 1:nrow(CAcounties)) {
   ex <- extract(mosquitoes18, CAcounties[i,], cellnumbers = TRUE)
@@ -108,7 +129,35 @@ mosquitoes <- SpatialPointsDataFrame(inat_mosquitoes[,5:6],inat_mosquitoes)
 mosquitoes <- crs(mosquitoes_crs)
 plot(mosquitoes)
 
+## BIRDS (dead -> proxy for infected)
+## call CA county data for birds infected by year
+CAcounties18_birds <- CAcounties18[,names(CAcounties18)[11]]
+CAcounties17_birds <- CAcounties17[,names(CAcounties17)[11]]
+CAcounties16_birds <- CAcounties16[,names(CAcounties16)[11]]
+CAcounties15_birds <- CAcounties15[,names(CAcounties15)[11]]
+CAcounties14_birds <- CAcounties14[,names(CAcounties14)[11]]
+CAcounties13_birds <- CAcounties13[,names(CAcounties13)[11]]
+## rasterize CA county data for birds infected by year
+birds18 <- rasterize(CAcounties18_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds17 <- rasterize(CAcounties17_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds16 <- rasterize(CAcounties16_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds15 <- rasterize(CAcounties15_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds14 <- rasterize(CAcounties14_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds13 <- rasterize(CAcounties13_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+## randomly assign infected birds to a given number of cells in a county
+for (i in 1:nrow(CAcounties)) {
+  ex <- extract(birds18, CAcounties[i,], cellnumbers = TRUE)
+  ex <- data.frame(ex)
+  ex <- ex$cell
+  samples <- sample(ex, 3, replace = FALSE)
+  birds18[ex] <- 0
+  birds18[samples] <- ceiling(CAcounties18_birds$birds[i]/3)
+}
+plot(birds18)
+plot(CAcounties, add = TRUE)
+
 ## BIRDS (total population)
+## based on iNaturalist
 species_of_interest <- "American Robin"
 extent <- c(32.534156, -124.409591, 42.009518, -114.131211)
 inat_birds <- get_inat_obs(query = species_of_interest, maxresults = 30000, geo = TRUE, bounds = extent, quality = "research")
@@ -120,3 +169,50 @@ birds_crs <- '{"type": "name",
 birds <- SpatialPointsDataFrame(inat_birds[,5:6],inat_birds)
 birds <- crs(birds_crs)
 plot(birds)
+
+## BIRDS (total population)
+## based on eBird
+birds <- ebirdst_download(species = "amerob",  path = rappdirs::user_data_dir("ebirdst"),
+                 tifs_only = TRUE, force = TRUE)
+birds_abund <- load_raster("abundance_umean", path = birds)
+birds_abund <- crop(birds_abund, california_nlcd_3000m)
+birds_abund <- mask(birds_abund, california_nlcd_3000m)
+plot(birds_abund)
+birds_abund
+#project_extent(birds_abund, crs = california_nlcd_3000m)
+#birds_abund <- spTransform(birds_abund, CRSobj = crs(california_nlcd_3000m))
+plot(birds_abund)
+ebirdst_extent(CAcounties)
+
+birds <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
+## merge eBird data with county shapefiles
+CA18_birds <- merge(CAcounties, birds[birds$year==2018,], by = "NAME")
+CA17_birds <- merge(CAcounties, birds[birds$year==2017,], by = "NAME")
+CA16_birds <- merge(CAcounties, birds[birds$year==2016,], by = "NAME")
+CA15_birds <- merge(CAcounties, birds[birds$year==2015,], by = "NAME")
+CA14_birds <- merge(CAcounties, birds[birds$year==2014,], by = "NAME")
+CA13_birds <- merge(CAcounties, birds[birds$year==2013,], by = "NAME")
+## call CA county data for birds infected by year
+CA18_birds <- CA18_birds[,names(CA18_birds)[11]]
+CA17_birds <- CA17_birds[,names(CA17_birds)[11]]
+CA16_birds <- CA16_birds[,names(CA16_birds)[11]]
+CA15_birds <- CA15_birds[,names(CA15_birds)[11]]
+CA14_birds <- CA14_birds[,names(CA14_birds)[11]]
+CA13_birds <- CA13_birds[,names(CA13_birds)[11]]
+## rasterize CA county data for birds infected by year
+birds18 <- rasterize(CAcounties18_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds17 <- rasterize(CAcounties17_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds16 <- rasterize(CAcounties16_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds15 <- rasterize(CAcounties15_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds14 <- rasterize(CAcounties14_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+birds13 <- rasterize(CAcounties13_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+
+## Write out the following raster files: infected_humans, total_humans, infected_birds,
+## total_birds, infected_mosquitoes, total_mosquitoes
+writeRaster(infected_humans, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_humans.tif")
+writeRaster(total_humans, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_humans.tif")
+writeRaster(infected_mosquitoes, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_mosquitoes.tif")
+writeRaster(total_mosquitoes, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_mosquitoes.tif")
+writeRaster(infected_birds, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_birds.tif")
+writeRaster(total_birds, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_birds.tif")
+
