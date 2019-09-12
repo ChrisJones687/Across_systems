@@ -29,9 +29,17 @@ california <- states[states$STATE_NAME == 'California',]
 california <- spTransform(california, CRSobj = crs(nlcd2016))
 california_nlcd <- crop(nlcd2016, california)
 california_nlcd <- mask(california_nlcd, california)
+
+## load California NLCD raster files
 ## aggregate NLCD data to a lower resolution
 california_nlcd_900m <- aggregate(california_nlcd, fact = 30, fun = 'sum')
-california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
+#california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
+writeRaster(california_nlcd_900m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
+#writeRaster(california_nlcd_3000m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
+california_nlcd_900m <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
+california_nlcd_3000m <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
+
+
 #CAcounties <- spTransform(CAcounties18, CRSobj = crs(california_nlcd_3000m))
 ## transform county data to NLCD data
 CAcounties18 <- spTransform(CAcounties18, CRSobj = crs(california_nlcd_3000m))
@@ -213,10 +221,19 @@ CA18_birds$OBSERVATION.COUNT <- as.numeric(CA18_birds$OBSERVATION.COUNT)
 ## create spatial dataframe for bird total population in CA
 CA18_birds_lat_lon <- cbind(CA18_birds$LATITUDE, CA18_birds$LONGITUDE)
 CA18_birds_coordinates <- CA18_birds_lat_lon
-coordinates(CA18_birds_coordinates)=~long+lat
+utm_nlcd_crs <- st_crs(california_nlcd_3000m)
+class(utm_nlcd_crs)
+CA18_birds2 <- st_as_sf(CA18_birds, coords = c("LATITUDE", "LONGITUDE"), crs = utm_nlcd_crs)
+CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
+
+#coordinates(CA18_birds_coordinates)=~long+lat
 #proj4string(CA18_birds_coordinates) <- CRS("+proj=longlat +datum=WGS84")
 #LLcoor<-spTransform(CA18_birds_coordinates,CRS("+proj=longlat"))
-raster::shapefile(CA18_birds_coordinates, "CA18_total_birds.shp")
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, coords.nrs = numeric(0), 
+                       proj4string = CRS(as.character(utm_nlcd_crs)), bbox = NULL)
+plot(CA18_total_birds)
+#raster::shapefile(CA18_birds, "CA18_total_birds.shp")
+
 ## rasterize the spatial dataframe
 CA18_birds2 <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m, field = CA18_birds$OBSERVATION.COUNT, fun = 'sum')
 CA18_birds2
