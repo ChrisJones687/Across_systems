@@ -220,9 +220,9 @@ CA18_birds$OBSERVATION.COUNT <- as.numeric(CA18_birds$OBSERVATION.COUNT)
 
 ## create spatial dataframe for bird total population in CA
 CA18_birds_lat_lon <- cbind(CA18_birds$LATITUDE, CA18_birds$LONGITUDE)
-CA18_birds_coordinates <- CA18_birds_lat_lon
+#CA18_birds_coordinates <- CA18_birds_lat_lon
 utm_nlcd_crs <- st_crs(california_nlcd_3000m)
-class(utm_nlcd_crs)
+#class(utm_nlcd_crs)
 CA18_birds2 <- st_as_sf(CA18_birds, coords = c("LATITUDE", "LONGITUDE"), crs = utm_nlcd_crs)
 CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
 
@@ -232,11 +232,14 @@ CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
 CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, coords.nrs = numeric(0), 
                        proj4string = CRS(as.character(utm_nlcd_crs)), bbox = NULL)
 plot(CA18_total_birds)
+total_birds <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "OBSERVATION.COUNT", fun = 'sum')
+total_birds
+plot(total_birds)
 #raster::shapefile(CA18_birds, "CA18_total_birds.shp")
 
 ## rasterize the spatial dataframe
-CA18_birds2 <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m, field = CA18_birds$OBSERVATION.COUNT, fun = 'sum')
-CA18_birds2
+#CA18_birds2 <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m, field = CA18_birds$OBSERVATION.COUNT, fun = 'sum')
+#CA18_birds2
 
 # CA18_birds_counts = data.frame(CA18_birds$OBSERVATION.COUNT)
 # SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds_counts)
