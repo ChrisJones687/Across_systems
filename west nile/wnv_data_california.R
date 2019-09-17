@@ -3,9 +3,9 @@
 library(PoPS)
 library(raster)
 
-infected_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/infected.tif"
-host_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif"
-total_plants_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif"
+infected_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected.tif"
+host_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/host.tif"
+total_plants_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_hosts.tif"
 temperature_file <- ""
 temperature_coefficient_file <- ""
 precipitation_coefficient_file <-""
@@ -40,22 +40,22 @@ anthropogenic_dir <- "NONE"
 anthropogenic_kappa <- 0
 
 data <- PoPS::pops(infected_file, host_file, total_plants_file, 
-                    temp, temperature_coefficient_file, 
-                    precip, precipitation_coefficient_file, 
-                    time_step, reproductive_rate,
-                    season_month_start, season_month_end, 
-                    start_time, end_time, 
-                    use_lethal_temperature, temperature_file,
-                    lethal_temperature, lethal_temperature_month,
-                    mortality_on, mortality_rate, mortality_time_lag, 
-                    management, treatment_years, treatments_file,
-                    treatment_method, treatment_month,
-                    percent_natural_dispersal,
-                    natural_kernel_type, anthropogenic_kernel_type,
-                    natural_distance_scale, anthropogenic_distance_scale,
-                    natural_dir, natural_kappa, 
-                    anthropogenic_dir, anthropogenic_kappa,
-                    random_seed = NULL)
+                   temp, temperature_coefficient_file, 
+                   precip, precipitation_coefficient_file, 
+                   time_step, reproductive_rate,
+                   season_month_start, season_month_end, 
+                   start_time, end_time, 
+                   use_lethal_temperature, temperature_file,
+                   lethal_temperature, lethal_temperature_month,
+                   mortality_on, mortality_rate, mortality_time_lag, 
+                   management, treatment_years, treatments_file,
+                   treatment_method, treatment_month,
+                   percent_natural_dispersal,
+                   natural_kernel_type, anthropogenic_kernel_type,
+                   natural_distance_scale, anthropogenic_distance_scale,
+                   natural_dir, natural_kappa, 
+                   anthropogenic_dir, anthropogenic_kappa,
+                   random_seed = NULL)
 
 plot(raster(data$infected[[2]]))
 

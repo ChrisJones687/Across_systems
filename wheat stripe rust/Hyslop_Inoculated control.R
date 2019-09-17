@@ -1,5 +1,6 @@
 library(doParallel)
 library(raster)
+library(ggplot2)
 
 infected_file <- "H:/My Drive/EEID/Wheat Stripe Rust/Hyslop/Hyslop_infected.tif"
 host_file <- "H:/My Drive/EEID/Wheat Stripe Rust/Hyslop/Hyslop_host.tif"
@@ -30,7 +31,7 @@ mortality_time_lag <- 0
 percent_natural_dispersal <- 1.0
 natural_kernel_type <- "cauchy"
 anthropogenic_kernel_type <- "cauchy"
-natural_distance_scale <- 10
+natural_distance_scale <- 6
 anthropogenic_distance_scale <- 0.0
 natural_dir <- "W"
 natural_kappa <- 0.15
@@ -43,7 +44,7 @@ core_count <- 3
 cl <- makeCluster(core_count)
 registerDoParallel(cl)
 
-infected_stack <- foreach::foreach(i = 1:1000, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
+infected_stack <- foreach::foreach(i = 1:100, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
   data <- PoPS::pops(infected_file, host_file, total_plants_file, 
                      temp, temperature_coefficient_file, 
                      precip, precipitation_coefficient_file, 
@@ -98,4 +99,9 @@ for (i in 1:ncol(probability_end)) {
   data$disease_severity_sd[i] <- sd(probability_end[seq(1,nrow(probability_end),1), i])
 }
 
-plot(data$distance, data$disease_severity)
+p <- ggplot(data, aes(x=distance, y=disease_severity)) + 
+  geom_line() +
+  geom_point()+
+  geom_errorbar(aes(ymin=disease_severity-disease_severity_sd, ymax=disease_severity+disease_severity_sd), width=.2,
+                position=position_dodge(0.05))
+p
