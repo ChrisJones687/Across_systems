@@ -7,12 +7,13 @@ library(rinat)
 library(ebirdst)
 library(auk)
 library(sf)
-wnv <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/west_nile_california.csv")
+library(naniar)
+wnv <- read.csv("G:/My Drive/EEID/West Nile Virus/west_nile_california.csv")
 wnv[is.na(wnv)] <- 0
 
 ### California counties
 ## read in data
-counties <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/us_lower_48_counties.shp")
+counties <- readOGR("G:/My Drive/EEID/West Nile Virus/us_lower_48_counties.shp")
 CAcounties <- counties[counties$STATE_NAME == 'California',]
 names(wnv)[2] <- "NAME"
 ## merge WNV data with county shapefiles
@@ -23,8 +24,8 @@ CAcounties15 <- merge(CAcounties, wnv[wnv$year==2015,], by = "NAME")
 CAcounties14 <- merge(CAcounties, wnv[wnv$year==2014,], by = "NAME")
 CAcounties13 <- merge(CAcounties, wnv[wnv$year==2013,], by = "NAME")
 ## clip NLCD data to California extent
-nlcd2016 <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
-states <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
+nlcd2016 <- raster("G:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
+states <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
 california <- states[states$STATE_NAME == 'California',]
 california <- spTransform(california, CRSobj = crs(nlcd2016))
 california_nlcd <- crop(nlcd2016, california)
@@ -34,10 +35,10 @@ california_nlcd <- mask(california_nlcd, california)
 ## aggregate NLCD data to a lower resolution
 california_nlcd_900m <- aggregate(california_nlcd, fact = 30, fun = 'sum')
 #california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
-writeRaster(california_nlcd_900m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
-#writeRaster(california_nlcd_3000m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
-california_nlcd_900m <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
-california_nlcd_3000m <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
+writeRaster(california_nlcd_900m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
+#writeRaster(california_nlcd_3000m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
+california_nlcd_900m <- raster("G:/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
+california_nlcd_3000m <- raster("G:/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
 
 
 #CAcounties <- spTransform(CAcounties18, CRSobj = crs(california_nlcd_3000m))
@@ -81,7 +82,7 @@ plot(humans18)
 plot(CAcounties, add = TRUE)
 
 ## HUMANS (total population)
-total_humans <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/humanpopulationcalifornia.csv")
+total_humans <- read.csv("G:/My Drive/EEID/West Nile Virus/humanpopulationcalifornia.csv")
 total_humans <- total_humans[,1:2]
 total_humans$NAME <- as.character(total_humans$NAME)
 CAcounties$NAME <- as.character(CAcounties$NAME)
@@ -205,7 +206,46 @@ plot(CAcounties, add = TRUE)
 # plot(birds_abund)
 # ebirdst_extent(CAcounties)
 
-birds <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
+
+
+
+
+birds <- read.csv("G:/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
+birds$count <- birds$OBSERVATION.COUNT
+na_string <- "X"
+birds$count <- as.character(birds$count)
+birds$count %>% replace_with_na_all(condition = ~.x %in% na_string)
+birds$count[is.na(birds$count)] <- "0"
+birds$count <- as.numeric(birds$count)
+birds$count
+
+CA18_birds <- birds[birds$YEAR==2018,]
+lon <- CA18_birds$LONGITUDE
+lat <- CA18_birds$LATITUDE
+lon <- as.numeric(lon)
+lat <- as.numeric(lat)
+CA18_birds_lon_lat <- cbind.data.frame(lon, lat)
+#vals <- rep(1,n)
+#r <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m)
+
+p <- as.data.frame(cbind(CA18_birds_lon_lat, name = CA18_birds$count))
+coordinates(p) <- ~lon+lat
+infected_birds <- rasterize(p, california_nlcd_3000m, 'name', fun = 'sum')
+infected_birds
+plot(infected_birds)
+
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds, proj4string = CRS(california_nlcd_3000m))
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds, coords.nrs = numeric(0), 
+                                           proj4string = CRS(california_nlcd_3000m), bbox = NULL)
+CA18_total_birds
+
+
+
+
+
+
+
+birds <- read.csv("G:/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
 ## extract eBird data by year
 CA18_birds <- birds[birds$YEAR==2018,]
 CA17_birds <- birds[birds$YEAR==2017,]
@@ -214,23 +254,26 @@ CA15_birds <- birds[birds$YEAR==2015,]
 CA14_birds <- birds[birds$YEAR==2014,]
 CA13_birds <- birds[birds$YEAR==2013,]
 
-CA18_birds$LATITUDE <- as.numeric(CA18_birds$LATITUDE)
-CA18_birds$LONGITUDE <- as.numeric(CA18_birds$LONGITUDE)
-CA18_birds$OBSERVATION.COUNT <- as.numeric(CA18_birds$OBSERVATION.COUNT)
+# CA18_birds$LATITUDE <- as.numeric(CA18_birds$LATITUDE)
+# CA18_birds$LONGITUDE <- as.numeric(CA18_birds$LONGITUDE)
+# CA18_birds$OBSERVATION.COUNT <- as.numeric(CA18_birds$OBSERVATION.COUNT)
 
 ## create spatial dataframe for bird total population in CA
-CA18_birds_lat_lon <- cbind(CA18_birds$LATITUDE, CA18_birds$LONGITUDE)
+lon <- CA18_birds$LONGITUDE
+lat <- CA18_birds$LATITUDE
+CA18_birds_lat_lon <- cbind(lon, lat)
 #CA18_birds_coordinates <- CA18_birds_lat_lon
 utm_nlcd_crs <- st_crs(california_nlcd_3000m)
 #class(utm_nlcd_crs)
-CA18_birds2 <- st_as_sf(CA18_birds, coords = c("LATITUDE", "LONGITUDE"), crs = utm_nlcd_crs)
-CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
+CA18_birds2 <- st_as_sf(CA18_birds, coords = c(lon, lat), crs = utm_nlcd_crs)
+#CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
 
 #coordinates(CA18_birds_coordinates)=~long+lat
 #proj4string(CA18_birds_coordinates) <- CRS("+proj=longlat +datum=WGS84")
 #LLcoor<-spTransform(CA18_birds_coordinates,CRS("+proj=longlat"))
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, proj4string = CRS(california_nlcd_3000m))
 CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, coords.nrs = numeric(0), 
-                       proj4string = CRS(as.character(utm_nlcd_crs)), bbox = NULL)
+                       proj4string = CRS(california_nlcd_3000m), bbox = NULL)
 plot(CA18_total_birds)
 total_birds <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "OBSERVATION.COUNT", fun = 'sum')
 total_birds
@@ -268,10 +311,10 @@ plot(total_birds)
 
 ## Write out the following raster files: infected_humans, total_humans, infected_birds,
 ## total_birds, infected_mosquitoes, total_mosquitoes
-writeRaster(infected_humans, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_humans.tif")
-writeRaster(total_humans, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_humans.tif")
-writeRaster(infected_mosquitoes, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_mosquitoes.tif")
-writeRaster(total_mosquitoes, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_mosquitoes.tif")
-writeRaster(infected_birds, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/infected_birds.tif")
-writeRaster(total_birds, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/West Nile Virus/total_birds.tif")
+writeRaster(infected_humans, "G:/My Drive/EEID/West Nile Virus/infected_humans.tif")
+writeRaster(total_humans, "G:/My Drive/EEID/West Nile Virus/total_humans.tif")
+writeRaster(infected_mosquitoes, "G:/My Drive/EEID/West Nile Virus/infected_mosquitoes.tif")
+writeRaster(total_mosquitoes, "G:/My Drive/EEID/West Nile Virus/total_mosquitoes.tif")
+writeRaster(infected_birds, "G:/My Drive/EEID/West Nile Virus/infected_birds.tif")
+writeRaster(total_birds, "G:/My Drive/EEID/West Nile Virus/total_birds.tif")
 
