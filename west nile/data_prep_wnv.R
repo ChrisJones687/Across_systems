@@ -8,6 +8,7 @@ library(ebirdst)
 library(auk)
 library(sf)
 library(naniar)
+library(plotKML)
 wnv <- read.csv("G:/My Drive/EEID/West Nile Virus/west_nile_california.csv")
 wnv[is.na(wnv)] <- 0
 
@@ -28,27 +29,21 @@ nlcd2016 <- raster("G:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover
 states <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
 california <- states[states$STATE_NAME == 'California',]
 california <- spTransform(california, CRSobj = crs(nlcd2016))
-california_nlcd <- crop(nlcd2016, california)
-california_nlcd <- mask(california_nlcd, california)
+# california_nlcd <- crop(nlcd2016, california)
+# california_nlcd <- mask(california_nlcd, california)
 
 ## load California NLCD raster files
 ## aggregate NLCD data to a lower resolution
-california_nlcd_900m <- aggregate(california_nlcd, fact = 30, fun = 'sum')
-#california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
-writeRaster(california_nlcd_900m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
-#writeRaster(california_nlcd_3000m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
+# california_nlcd_900m <- aggregate(california_nlcd, fact = 30, fun = 'sum')
+# california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
+# writeRaster(california_nlcd_900m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
+# #writeRaster(california_nlcd_3000m, "G:/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
 california_nlcd_900m <- raster("G:/My Drive/EEID/West Nile Virus/california_nlcd_900m.img")
 california_nlcd_3000m <- raster("G:/My Drive/EEID/West Nile Virus/california_nlcd_3000m.img")
-
 
 #CAcounties <- spTransform(CAcounties18, CRSobj = crs(california_nlcd_3000m))
 ## transform county data to NLCD data
 CAcounties18 <- spTransform(CAcounties18, CRSobj = crs(california_nlcd_3000m))
-CAcounties17 <- spTransform(CAcounties17, CRSobj = crs(california_nlcd_3000m))
-CAcounties16 <- spTransform(CAcounties16, CRSobj = crs(california_nlcd_3000m))
-CAcounties15 <- spTransform(CAcounties15, CRSobj = crs(california_nlcd_3000m))
-CAcounties14 <- spTransform(CAcounties14, CRSobj = crs(california_nlcd_3000m))
-CAcounties13 <- spTransform(CAcounties13, CRSobj = crs(california_nlcd_3000m))
 
 ###############
 # HUMANS
@@ -57,18 +52,10 @@ CAcounties13 <- spTransform(CAcounties13, CRSobj = crs(california_nlcd_3000m))
 ## HUMANS (infected)
 ## call CA county data for humans infected by year
 CAcounties18_humans <- CAcounties18[,names(CAcounties18)[9]]
-CAcounties17_humans <- CAcounties17[,names(CAcounties17)[9]]
-CAcounties16_humans <- CAcounties16[,names(CAcounties16)[9]]
-CAcounties15_humans <- CAcounties15[,names(CAcounties15)[9]]
-CAcounties14_humans <- CAcounties14[,names(CAcounties14)[9]]
-CAcounties13_humans <- CAcounties13[,names(CAcounties13)[9]]
+
 ## rasterize CA county data for humans infected by year
 humans18 <- rasterize(CAcounties18_humans, california_nlcd_3000m, field = "human", fun = 'last')
-humans17 <- rasterize(CAcounties17_humans, california_nlcd_3000m, field = "human", fun = 'last')
-humans16 <- rasterize(CAcounties16_humans, california_nlcd_3000m, field = "human", fun = 'last')
-humans15 <- rasterize(CAcounties15_humans, california_nlcd_3000m, field = "human", fun = 'last')
-humans14 <- rasterize(CAcounties14_humans, california_nlcd_3000m, field = "human", fun = 'last')
-humans13 <- rasterize(CAcounties13_humans, california_nlcd_3000m, field = "human", fun = 'last')
+
 ## randomly assign infected humans to a given number of cells in a county
 for (i in 1:nrow(CAcounties)) {
   ex <- extract(humans18, CAcounties[i,], cellnumbers = TRUE)
@@ -110,18 +97,8 @@ plot(total_humans_raster)
 ## MOSQUITOES (infected)
 ## call CA county data for mosquitoes infected by year
 CAcounties18_mosquitoes <- CAcounties18[,names(CAcounties18)[12]]
-CAcounties17_mosquitoes <- CAcounties17[,names(CAcounties17)[12]]
-CAcounties16_mosquitoes <- CAcounties16[,names(CAcounties16)[12]]
-CAcounties15_mosquitoes <- CAcounties15[,names(CAcounties15)[12]]
-CAcounties14_mosquitoes <- CAcounties14[,names(CAcounties14)[12]]
-CAcounties13_mosquitoes <- CAcounties13[,names(CAcounties13)[12]]
 ## rasterize CA county data for mosquitoes infected by year
 mosquitoes18 <- rasterize(CAcounties18_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-mosquitoes17 <- rasterize(CAcounties17_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-mosquitoes16 <- rasterize(CAcounties16_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-mosquitoes15 <- rasterize(CAcounties15_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-mosquitoes14 <- rasterize(CAcounties14_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
-mosquitoes13 <- rasterize(CAcounties13_mosquitoes, california_nlcd_3000m, field = "mosquitoes", fun = 'last')
 ## randomly assign infected mosquitoes to a given number of cells in a county
 for (i in 1:nrow(CAcounties)) {
   ex <- extract(mosquitoes18, CAcounties[i,], cellnumbers = TRUE)
@@ -138,14 +115,36 @@ plot(CAcounties, add = TRUE)
 species_of_interest <- "Mosquitoes"
 extent <- c(32.534156, -124.409591, 42.009518, -114.131211)
 inat_mosquitoes <- get_inat_obs(query = species_of_interest, maxresults = 30000, geo = TRUE, bounds = extent, quality = "research")
+CA18_mosquitoes <- inat_mosquitoes[inat_mosquitoes$YEAR==2018,]
+lon <- CA18_mosquitoes$LONGITUDE
+lat <- CA18_mosquitoes$LATITUDE
+count <- CA18_mosquitoes$count
+CA18_mosquitoes_data <- cbind.data.frame(count)
+CA18_mosquitoes_lon_lat <- cbind.data.frame(lon, lat)
+
+
 ## extract points for mosquito sightings and plot
 mosquitoes_crs <- '{"type": "name",
 "properties": {
 "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
 }}'
+CA18_total_mosquitoes <- SpatialPointsDataFrame(CA18_mosquitoes_lon_lat, CA18_mosquitoes_data)
+
 mosquitoes <- SpatialPointsDataFrame(inat_mosquitoes[,5:6],inat_mosquitoes)
 mosquitoes <- crs(mosquitoes_crs)
+total_mosquitoes <- rasterize() 
 plot(mosquitoes)
+
+
+
+CA18_birds <- birds[birds$YEAR==2018,]
+lon <- CA18_birds$LONGITUDE
+lat <- CA18_birds$LATITUDE
+count <- CA18_birds$count
+CA18_data_frame <- cbind.data.frame(count)
+CA18_birds_lon_lat <- cbind.data.frame(lon, lat)
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds_data, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
+total_birds18 <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
 
 ###############
 # BIRDS
@@ -154,160 +153,34 @@ plot(mosquitoes)
 ## BIRDS (dead -> proxy for infected)
 ## call CA county data for birds infected by year
 CAcounties18_birds <- CAcounties18[,names(CAcounties18)[11]]
-CAcounties17_birds <- CAcounties17[,names(CAcounties17)[11]]
-CAcounties16_birds <- CAcounties16[,names(CAcounties16)[11]]
-CAcounties15_birds <- CAcounties15[,names(CAcounties15)[11]]
-CAcounties14_birds <- CAcounties14[,names(CAcounties14)[11]]
-CAcounties13_birds <- CAcounties13[,names(CAcounties13)[11]]
 ## rasterize CA county data for birds infected by year
-birds18 <- rasterize(CAcounties18_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-birds17 <- rasterize(CAcounties17_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-birds16 <- rasterize(CAcounties16_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-birds15 <- rasterize(CAcounties15_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-birds14 <- rasterize(CAcounties14_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-birds13 <- rasterize(CAcounties13_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-## randomly assign infected birds to a given number of cells in a county
-for (i in 1:nrow(CAcounties)) {
-  ex <- extract(birds18, CAcounties[i,], cellnumbers = TRUE)
+infected_birds18 <- rasterize(CAcounties18_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+## randomly assign infected birds to a given number of cells in a county 2018
+for (i in 1:nrow(CAcounties18)) {
+  ex <- extract(infected_birds18, CAcounties18[i,], cellnumbers = TRUE)
   ex <- data.frame(ex)
   ex <- ex$cell
   samples <- sample(ex, 3, replace = FALSE)
-  birds18[ex] <- 0
-  birds18[samples] <- ceiling(CAcounties18_birds$birds[i]/3)
+  infected_birds18[ex] <- 0
+  infected_birds18[samples] <- ceiling(CAcounties18_birds$birds[i]/3)
 }
-plot(birds18)
-plot(CAcounties, add = TRUE)
 
 ## BIRDS (total population)
-## based on iNaturalist
-# species_of_interest <- "American Robin"
-# extent <- c(32.534156, -124.409591, 42.009518, -114.131211)
-# inat_birds <- get_inat_obs(query = species_of_interest, maxresults = 30000, geo = TRUE, bounds = extent, quality = "research")
-# ## extract points for American robin sightings and plot
-# birds_crs <- '{"type": "name",
-# "properties": {
-# "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-# }}'
-# birds <- SpatialPointsDataFrame(inat_birds[,5:6],inat_birds)
-# birds <- crs(birds_crs)
-# plot(birds)
-
-## BIRDS (total population)
-## based on eBird
-# birds <- ebirdst_download(species = "amerob",  path = rappdirs::user_data_dir("ebirdst"),
-#                  tifs_only = TRUE, force = TRUE)
-# birds_abund <- load_raster("abundance_umean", path = birds)
-# birds_abund <- crop(birds_abund, california_nlcd_3000m)
-# birds_abund <- mask(birds_abund, california_nlcd_3000m)
-# plot(birds_abund)
-# birds_abund
-# #project_extent(birds_abund, crs = california_nlcd_3000m)
-# #birds_abund <- spTransform(birds_abund, CRSobj = crs(california_nlcd_3000m))
-# plot(birds_abund)
-# ebirdst_extent(CAcounties)
-
-
-
-
-
-birds <- read.csv("G:/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
-birds$count <- birds$OBSERVATION.COUNT
-na_string <- "X"
+## set up bird data
+birds <- read.csv("G:/My Drive/EEID/West Nile Virus/american_robin_CA_2013_2018.csv")
 birds$count <- as.character(birds$count)
-birds$count %>% replace_with_na_all(condition = ~.x %in% na_string)
 birds$count[is.na(birds$count)] <- "0"
 birds$count <- as.numeric(birds$count)
-birds$count
-
+## create rasters for total birds 2013-2018
+## 2018
 CA18_birds <- birds[birds$YEAR==2018,]
 lon <- CA18_birds$LONGITUDE
 lat <- CA18_birds$LATITUDE
-lon <- as.numeric(lon)
-lat <- as.numeric(lat)
+count <- CA18_birds$count
+CA18_birds_data <- cbind.data.frame(count)
 CA18_birds_lon_lat <- cbind.data.frame(lon, lat)
-#vals <- rep(1,n)
-#r <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m)
-
-p <- as.data.frame(cbind(CA18_birds_lon_lat, name = CA18_birds$count))
-coordinates(p) <- ~lon+lat
-infected_birds <- rasterize(p, california_nlcd_3000m, 'name', fun = 'sum')
-infected_birds
-plot(infected_birds)
-
-CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds, proj4string = CRS(california_nlcd_3000m))
-CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds, coords.nrs = numeric(0), 
-                                           proj4string = CRS(california_nlcd_3000m), bbox = NULL)
-CA18_total_birds
-
-
-
-
-
-
-
-birds <- read.csv("G:/My Drive/EEID/West Nile Virus/ebd_US-CA_amerob_201301_201812_relJul-2019.csv")
-## extract eBird data by year
-CA18_birds <- birds[birds$YEAR==2018,]
-CA17_birds <- birds[birds$YEAR==2017,]
-CA16_birds <- birds[birds$YEAR==2016,]
-CA15_birds <- birds[birds$YEAR==2015,]
-CA14_birds <- birds[birds$YEAR==2014,]
-CA13_birds <- birds[birds$YEAR==2013,]
-
-# CA18_birds$LATITUDE <- as.numeric(CA18_birds$LATITUDE)
-# CA18_birds$LONGITUDE <- as.numeric(CA18_birds$LONGITUDE)
-# CA18_birds$OBSERVATION.COUNT <- as.numeric(CA18_birds$OBSERVATION.COUNT)
-
-## create spatial dataframe for bird total population in CA
-lon <- CA18_birds$LONGITUDE
-lat <- CA18_birds$LATITUDE
-CA18_birds_lat_lon <- cbind(lon, lat)
-#CA18_birds_coordinates <- CA18_birds_lat_lon
-utm_nlcd_crs <- st_crs(california_nlcd_3000m)
-#class(utm_nlcd_crs)
-CA18_birds2 <- st_as_sf(CA18_birds, coords = c(lon, lat), crs = utm_nlcd_crs)
-#CA18_birds2 <- st_transform(CA18_birds2, crs = utm_nlcd_crs)
-
-#coordinates(CA18_birds_coordinates)=~long+lat
-#proj4string(CA18_birds_coordinates) <- CRS("+proj=longlat +datum=WGS84")
-#LLcoor<-spTransform(CA18_birds_coordinates,CRS("+proj=longlat"))
-CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, proj4string = CRS(california_nlcd_3000m))
-CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds, coords.nrs = numeric(0), 
-                       proj4string = CRS(california_nlcd_3000m), bbox = NULL)
-plot(CA18_total_birds)
-total_birds <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "OBSERVATION.COUNT", fun = 'sum')
-total_birds
-plot(total_birds)
-#raster::shapefile(CA18_birds, "CA18_total_birds.shp")
-
-## rasterize the spatial dataframe
-#CA18_birds2 <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m, field = CA18_birds$OBSERVATION.COUNT, fun = 'sum')
-#CA18_birds2
-
-# CA18_birds_counts = data.frame(CA18_birds$OBSERVATION.COUNT)
-# SpatialPointsDataFrame(CA18_birds_lat_lon, CA18_birds_counts)
-# 
-# ## then transform the spatial dataframe into a raster file
-# california_nlcd_3000m <- aggregate(california_nlcd, fact = 100, fun = 'sum')
-# CA18_birds <- st_as_sf(CA18_birds, coords = c("LATITUDE", "LONGITUDE"), crs = california_nlcd_3000m)
-# CA18_birds2 <- rasterize(CA18_birds_lat_lon, california_nlcd_3000m, field = CA18_birds$OBSERVATION.COUNT, fun = 'sum')
-# CA18_birds2
-# plot(CA18_birds2)
-
-# ## call CA county data for birds infected by year
-# CA18_birds <- CA18_birds[,names(CA18_birds)[11]]
-# CA17_birds <- CA17_birds[,names(CA17_birds)[11]]
-# CA16_birds <- CA16_birds[,names(CA16_birds)[11]]
-# CA15_birds <- CA15_birds[,names(CA15_birds)[11]]
-# CA14_birds <- CA14_birds[,names(CA14_birds)[11]]
-# CA13_birds <- CA13_birds[,names(CA13_birds)[11]]
-# ## rasterize CA county data for birds infected by year
-# birds18 <- rasterize(CAcounties18_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-# birds17 <- rasterize(CAcounties17_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-# birds16 <- rasterize(CAcounties16_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-# birds15 <- rasterize(CAcounties15_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-# birds14 <- rasterize(CAcounties14_birds, california_nlcd_3000m, field = "birds", fun = 'last')
-# birds13 <- rasterize(CAcounties13_birds, california_nlcd_3000m, field = "birds", fun = 'last')
+CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_birds_data, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
+total_birds18 <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
 
 ## Write out the following raster files: infected_humans, total_humans, infected_birds,
 ## total_birds, infected_mosquitoes, total_mosquitoes
@@ -316,5 +189,7 @@ writeRaster(total_humans, "G:/My Drive/EEID/West Nile Virus/total_humans.tif")
 writeRaster(infected_mosquitoes, "G:/My Drive/EEID/West Nile Virus/infected_mosquitoes.tif")
 writeRaster(total_mosquitoes, "G:/My Drive/EEID/West Nile Virus/total_mosquitoes.tif")
 writeRaster(infected_birds, "G:/My Drive/EEID/West Nile Virus/infected_birds.tif")
-writeRaster(total_birds, "G:/My Drive/EEID/West Nile Virus/total_birds.tif")
+## BIRDS (total population) 2013-2018
+writeRaster(total_birds18, "G:/My Drive/EEID/West Nile Virus/total_birds18.tif", overwrite = TRUE)
+
 
