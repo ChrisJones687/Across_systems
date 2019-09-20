@@ -18,12 +18,7 @@ counties <- readOGR("G:/My Drive/EEID/West Nile Virus/us_lower_48_counties.shp")
 CAcounties <- counties[counties$STATE_NAME == 'California',]
 names(wnv)[2] <- "NAME"
 ## merge WNV data with county shapefiles
-CAcounties18 <- merge(CAcounties, wnv[wnv$year==2018,], by = "NAME")
-CAcounties17 <- merge(CAcounties, wnv[wnv$year==2017,], by = "NAME")
-CAcounties16 <- merge(CAcounties, wnv[wnv$year==2016,], by = "NAME")
-CAcounties15 <- merge(CAcounties, wnv[wnv$year==2015,], by = "NAME")
-CAcounties14 <- merge(CAcounties, wnv[wnv$year==2014,], by = "NAME")
-CAcounties13 <- merge(CAcounties, wnv[wnv$year==2013,], by = "NAME")
+CAcounties18 <- merge(CAcounties, wnv, by = "NAME")
 ## clip NLCD data to California extent
 nlcd2016 <- raster("G:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
 states <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
@@ -190,6 +185,6 @@ writeRaster(infected_mosquitoes, "G:/My Drive/EEID/West Nile Virus/infected_mosq
 writeRaster(total_mosquitoes, "G:/My Drive/EEID/West Nile Virus/total_mosquitoes.tif")
 writeRaster(infected_birds, "G:/My Drive/EEID/West Nile Virus/infected_birds.tif")
 ## BIRDS (total population) 2013-2018
-writeRaster(total_birds18, "G:/My Drive/EEID/West Nile Virus/total_birds18.tif", overwrite = TRUE)
+writeRaster(total_birds18, "G:/My Drive/EEID/West Nile Virus/all_total_birds18.tif", overwrite = TRUE)
 
 

@@ -133,7 +133,7 @@ infected_humans13 <- humans13
 
 ## HUMANS (total population)
 total_humans <- read.csv("G:/My Drive/EEID/West Nile Virus/humanpopulationcalifornia.csv")
-total_humans <- total_humans[,1:2]
+#total_humans <- total_humans[,1:2]
 total_humans$NAME <- as.character(total_humans$NAME)
 CAcounties18$NAME <- as.character(CAcounties18$NAME)
 total_humans$Population <- as.numeric(total_humans$Population)
@@ -142,7 +142,7 @@ total_humans <- total_humans[order(total_humans$NAME),]
 #humans_CAcounties <- merge(CAcounties, total_humans$Population, by = "NAME")
 CAcounties18$Population <- total_humans$Population
 ## human total population raster
-total_humans <- rasterize(CAcounties18, california_nlcd_3000m, field = "Population", fun = 'last')
+total_humans18 <- rasterize(CAcounties18, california_nlcd_3000m, field = "2018", fun = 'sum')
 ## randomly assign total humans to a given number of cells in a county
 for (i in 1:nrow(CAcounties18)) {
   ex <- extract(total_humans, CAcounties18[i,], cellnumbers = TRUE)
@@ -151,6 +151,9 @@ for (i in 1:nrow(CAcounties18)) {
   total_humans[ex] <- ceiling(CAcounties18$Population[i]/length(ex))
 }
 total_humans <- mask(total_humans, california)
+
+total_humans_CA18 <- total_humans$2018
+
 
 ###############
 # MOSQUITOES
@@ -453,8 +456,10 @@ total_birds_CA18_1 <- total_birds_CA18[total_birds_CA18$MONTH==1,]
 count <- total_birds_CA18_1$count
 lon <- total_birds_CA18_1$LONGITUDE
 lat <- total_birds_CA18_1$LATITUDE
+california_crs <- st_crs(california_nlcd_3000m)
 CA18_1_birds_lon_lat <- cbind.data.frame(lon, lat)
-CA18_1_birds_data <- SpatialPointsDataFrame(CA18_1_birds_lon_lat, total_birds_CA18_1)
+CA18_1_birds_data <- cbind.data.frame(count)
+CA18_1_birds_data <- SpatialPointsDataFrame(CA18_1_birds_lon_lat, CA18_1_birds_data, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 CA18_1_total_birds <- rasterize(CA18_1_birds_data, california_nlcd_3000m, field = "count", fun = 'sum', mask= TRUE, background = 0) 
 CA18_1_total_birds <- mask(CA18_1_total_birds, california)
 ## february 2018

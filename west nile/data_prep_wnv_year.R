@@ -346,6 +346,7 @@ CA18_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA18_total_birds <- SpatialPointsDataFrame(CA18_birds_lon_lat, CA18_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds18 <- rasterize(CA18_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds18 <- mask(total_birds18, california)
 ## 2017
 CA17_birds <- birds[birds$YEAR==2017,]
 lon <- CA17_birds$LONGITUDE
@@ -356,6 +357,7 @@ CA17_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA17_total_birds <- SpatialPointsDataFrame(CA17_birds_lon_lat, CA17_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds17 <- rasterize(CA17_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds17 <- mask(total_birds17, california)
 ## 2016
 CA16_birds <- birds[birds$YEAR==2016,]
 lon <- CA16_birds$LONGITUDE
@@ -366,6 +368,7 @@ CA16_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA16_total_birds <- SpatialPointsDataFrame(CA16_birds_lon_lat, CA16_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds16 <- rasterize(CA16_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds16 <- mask(total_birds16, california)
 ## 2015
 CA15_birds <- birds[birds$YEAR==2015,]
 lon <- CA15_birds$LONGITUDE
@@ -376,6 +379,7 @@ CA15_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA15_total_birds <- SpatialPointsDataFrame(CA15_birds_lon_lat, CA15_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds15 <- rasterize(CA15_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds15 <- mask(total_birds15, california)
 ## 2014
 CA14_birds <- birds[birds$YEAR==2014,]
 lon <- CA14_birds$LONGITUDE
@@ -386,6 +390,7 @@ CA14_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA14_total_birds <- SpatialPointsDataFrame(CA14_birds_lon_lat, CA14_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds14 <- rasterize(CA14_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds14 <- mask(total_birds14, california)
 ## 2013
 CA13_birds <- birds[birds$YEAR==2013,]
 lon <- CA13_birds$LONGITUDE
@@ -396,6 +401,7 @@ CA13_birds_lon_lat <- cbind.data.frame(lon, lat)
 california_crs <- st_crs(california_nlcd_3000m)
 CA13_total_birds <- SpatialPointsDataFrame(CA13_birds_lon_lat, CA13_data_frame, proj4string = CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs"))
 total_birds13 <- rasterize(CA13_total_birds, california_nlcd_3000m, field = "count", fun = 'sum', mask = TRUE, background = 0)
+total_birds13 <- mask(total_birds13, california)
 
 ## Write out the following raster files: infected_humans, total_humans, infected_birds,
 ## total_birds, infected_mosquitoes, total_mosquitoes
