@@ -4,22 +4,22 @@ library(sp)
 library(rgdal)
 library(dplyr)
 library(fuzzyjoin)
-fmd <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/FMD dummy.csv")
+fmd <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/FMD dummy.csv")
 
 ### Texas (state)
-nlcd2016 <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
-states <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
+nlcd2016 <- raster("G:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
+states <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
 texas <- states[states$STATE_NAME == 'Texas',]
 texas <- spTransform(texas, CRSobj = crs(nlcd2016))
 
 texas_nlcd <- crop(nlcd2016, texas)
 texas_nlcd <- mask(texas_nlcd, texas)
 texas_nlcd[texas_nlcd != c(81,71)] <-0
-writeRaster(texas_nlcd81, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/texas_pasture.tif")
+writeRaster(texas_nlcd81, "G:/My Drive/EEID/Foot and Mouth Disease/texas_pasture.tif")
 
 ### Colorado (state)
-nlcd2016 <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
-states <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
+nlcd2016 <- raster("G:/My Drive/EEID/Foot and Mouth Disease/NLCD_2016_Land_Cover_L48_20190424.img")
+states <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_states.shp")
 colorado <- states[states$STATE_NAME == 'Colorado',]
 colorado <- spTransform(colorado, CRSobj = crs(nlcd2016))
 
@@ -29,19 +29,19 @@ colorado_nlcd[colorado_nlcd == 81] <- 1
 colorado_nlcd[colorado_nlcd == 71] <- 1
 colorado_nlcd[colorado_nlcd > 1] <- 0
 
-writeRaster(colorado_nlcd, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/colorado_pasture.tif")
+writeRaster(colorado_nlcd, "G:/My Drive/EEID/Foot and Mouth Disease/colorado_pasture.tif")
 colorado_nlcd_300m <- aggregate(colorado_nlcd, fact = 10, fun = 'sum')
-writeRaster(colorado_nlcd_300m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/colorado_pasture_300m.tif")
+writeRaster(colorado_nlcd_300m, "G:/My Drive/EEID/Foot and Mouth Disease/colorado_pasture_300m.tif")
 
 ### Colorado (counties)
-counties <- readOGR("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/us_lower_48_counties.shp")
+counties <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/us_lower_48_counties.shp")
 COcounties <- counties[counties$STATE_NAME == 'Colorado',]
-colorado_nlcd_300m <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/colorado_pasture_300m.tif")
+colorado_nlcd_300m <- raster("G:/My Drive/EEID/Foot and Mouth Disease/colorado_pasture_300m.tif")
 COcounties <- spTransform(COcounties, CRSobj = crs(colorado_nlcd_300m))
 COcounties$area_of_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
 # COcounties_pasture <- extract(colorado_nlcd_300m, COcounties, fun = sum)
-#writeOGR(COcounties, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/colorado_counties_pasturecattle.shp")
-colorado_cattle <- read.csv("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/colorado.csv")
+#writeOGR(COcounties, "G:/My Drive/EEID/Foot and Mouth Disease/colorado_counties_pasturecattle.shp")
+colorado_cattle <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/colorado.csv")
 names(colorado_cattle)[1] <- "NAME"
 COcounties <- COcounties[order(COcounties$NAME),]
 COcounties$cattle <- colorado_cattle$cattle
@@ -70,10 +70,10 @@ colorado_nlcd_300m <- mask(colorado_nlcd_300m, colorado)
 plot(colorado_nlcd_300m)
 
 # Write out host, total hosts, and infected files
-writeRaster(colorado_nlcd_300m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif")
+writeRaster(colorado_nlcd_300m, "G:/My Drive/EEID/Foot and Mouth Disease/host.tif")
 colorado_nlcd_300m[colorado_nlcd_300m >=0] <- maxValue(colorado_nlcd_300m)
-writeRaster(colorado_nlcd_300m, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif")
-host <- raster("/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif")
+writeRaster(colorado_nlcd_300m, "G:/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif")
+host <- raster("G:/My Drive/EEID/Foot and Mouth Disease/host.tif")
 host[host==27]
 infected <- host
 infected[infected<27] <- 0
@@ -81,4 +81,4 @@ infected[infected==27] <- 1
 infected[infected==0] <- NA
 infected[infected ==1]
 plot(infected)
-writeRaster(infected, "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/infected.tif")
+writeRaster(infected, "G:/My Drive/EEID/Foot and Mouth Disease/infected.tif")
