@@ -2,14 +2,20 @@
 library(raster)
 library(rgdal)
 library(rgeos)
+library(dplyr)
 ## Virginia (counties)
 # Read in data files
 zip <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/tl_2015_us_zcta510.shp")
 us_zip <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/uszips.csv")
-zip <- merge(zip, us_zip, by = "GEOID10")
-zip@data$NAME <- as.character(zip@data$NAME)
-zip@data[zip@data == "NA"] <- "NONE"
-virginia_zip <- zip[zip$State == 'VIRGINIA',]
+zip$GEOID10 <- as.character(zip$GEOID10)
+us_zip$GEOID10 <- as.character(us_zip$GEOID10)
+us_zip2 <- left_join(zip@data, us_zip, by = 'GEOID10')
+
+
+#zip <- merge(zip@data, us_zip, by = "GEOID10")
+#zip@data$NAME <- as.character(zip@data$NAME)
+#zip@data[zip@data == "NA"] <- "NONE"
+#virginia_zip <- zip[zip$State == 'VIRGINIA',]
 
 
 #virginia_zip <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/virginia_zipcodes.csv")
