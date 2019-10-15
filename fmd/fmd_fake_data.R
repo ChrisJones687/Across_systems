@@ -3,9 +3,9 @@
 library(PoPS)
 library(raster)
 
-infected_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/infected.tif"
-host_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/host.tif"
-total_plants_file <- "/Users/rachellantz/Google Drive File Stream/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif"
+infected_file <- "G:/My Drive/EEID/Foot and Mouth Disease/infected.tif"
+host_file <- "G:/My Drive/EEID/Foot and Mouth Disease/host.tif"
+total_plants_file <- "G:/My Drive/EEID/Foot and Mouth Disease/total_hosts.tif"
 temperature_file <- ""
 temperature_coefficient_file <- ""
 precipitation_coefficient_file <-""
