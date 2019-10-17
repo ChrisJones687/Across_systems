@@ -1,22 +1,60 @@
 ### 2001 UK epidemic model in Cumbria
 library(raster)
 library(sf)
+library(rgdal)
 
 # Read in data
-cumbria_farms <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/cumbria_uk_cattle.csv")
-uk_counties <- readOGR("C:/Users/lantzra/Downloads/Counties_and_Unitary_Authorities_December_2016_Full_Clipped_Boundaries_in_England_and_Wales.kml")
-uk_raster <- raster("C:/Users/lantzra/Downloads/")
+cumbria_all_farms <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/cumbria/cumbria_all_farms.csv")
+cumbria_infected_farms <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/cumbria/cumbria_uk.csv")
+uk_counties <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/cumbria/bdline_essh_gb/Data/GB/county_region.shp")
+uk_raster <- raster("G:/My Drive/EEID/Foot and Mouth Disease/cumbria/minisc_gb/minisc_gb/data/RGB_TIF_compressed/MiniScale_(mono)_R21.tif")
 
-cumbria_cattle <- rasterFromXYZ(cumbria_farms, res = c(NA,NA), crs = NA, digits = 5)
-cumbria_cattle
-plot(cumbria_cattle)
+# Organize data
+cumbria_all_farms$x <- as.numeric(cumbria_all_farms$x)
+cumbria_all_farms$y <- as.numeric(cumbria_all_farms$y)
+cumbria_all_farms$cattle <- as.numeric(cumbria_all_farms$cattle)
+#uk_counties <- spTransform(uk_counties, CRSobj = crs(uk_raster))
+# Crop UK files to Cumbria boundary
+cumbria <- uk_counties[uk_counties$NAME == 'Cumbria County',]
+cumbria_raster <- crop(uk_raster, cumbria)
+cumbria_raster <- mask(cumbria_raster, cumbria)
+cumbria_farm_locations <- cbind(cumbria_all_farms$x, cumbria_all_farms$y)
+cumbria_cattle <- cbind(cumbria_all_farms$cattle)
+# Create raster of farm locations and cattle in Cumbria
+cumbria_all_farms_cattle <- rasterize(cumbria_farm_locations, cumbria_raster, cumbria_cattle, fun = sum)
+cumbria_all_farms_cattle[cumbria_all_farms_cattle==0] <- NA
+writeRaster(cumbria_all_farms_cattle, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/cumbria_all_farms_cattle.img", overwrite = TRUE)
 
-# Create raster of cattle across UK
-great_britain <- readOGR("C:/Users/lantzra/Downloads/Great_Britain_shapefile/gb_10km.shp")
-plot(great_britain)
+# Write out host, total hosts, and infected files
+writeRaster(cumbria_all_farms_cattle, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/host.tif", overwrite = TRUE)
+cumbria_all_farms_cattle[cumbria_all_farms_cattle >=0] <- maxValue(cumbria_all_farms_cattle)
+writeRaster(cumbria_all_farms_cattle, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/total_hosts.tif", overwrite = TRUE)
+host <- raster("G:/My Drive/EEID/Foot and Mouth Disease/cumbria/host.tif")
+host[host==1593]
+infected <- host
+infected[infected<1593] <- 0
+infected[infected==1593] <- 1
+infected[infected==0] <- NA
+infected[infected==1]
+plot(infected)
+writeRaster(infected, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/infected.tif", overwrite = TRUE)
 
-# Convert UK counties kml to shapefile
-uk_counties <- st_read("C:/Users/lantzra/Downloads/Counties_and_Unitary_Authorities_December_2016_Full_Clipped_Boundaries_in_England_and_Wales.kml")
-uk_counties <- rbind(uk_counties)
-st_write(uk_counties, "C:/Users/lantzra/Downloads/uk_counties.shp")
-uk_counties <- readOGR("C:/Users/lantzra/Downloads/uk_counties.shp")
+# Create infected years file for calibrate function
+# Organize data
+cumbria_infected_farms$x <- as.numeric(cumbria_infected_farms$x)
+cumbria_infected_farms$y <- as.numeric(cumbria_infected_farms$y)
+cumbria_infected_farms$cattle <- as.numeric(cumbria_infected_farms$cattle)
+#uk_counties <- spTransform(uk_counties, CRSobj = crs(uk_raster))
+# Crop UK files to Cumbria boundary
+cumbria <- uk_counties[uk_counties$NAME == 'Cumbria County',]
+cumbria_raster <- crop(uk_raster, cumbria)
+cumbria_raster <- mask(cumbria_raster, cumbria)
+cumbria_farm_locations <- cbind(cumbria_infected_farms$x, cumbria_infected_farms$y)
+#cumbria_cattle <- cbind(cumbria_infected_farms$cattle)
+# Create raster of farm locations and cattle in Cumbria
+cumbria_infected_farms_cattle <- rasterize(cumbria_farm_locations, cumbria_raster)
+cumbria_infected_farms_cattle[cumbria_infected_farms_cattle==0] <- NA
+writeRaster(cumbria_infected_farms_cattle, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/cumbria_infected_farms_cattle.img", overwrite = TRUE)
+# Write out infected years file
+writeRaster(cumbria_infected_farms_cattle, "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/infected_2001.tif", overwrite = TRUE)
+
