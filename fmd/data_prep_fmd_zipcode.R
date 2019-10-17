@@ -3,7 +3,7 @@ library(raster)
 library(rgdal)
 library(rgeos)
 library(dplyr)
-## Virginia (counties)
+## Virginia (zip code)
 # Read in data files
 zip <- readOGR("G:/My Drive/EEID/Foot and Mouth Disease/tl_2015_us_zcta510.shp")
 us_zip <- read.csv("G:/My Drive/EEID/Foot and Mouth Disease/uszips.csv")
