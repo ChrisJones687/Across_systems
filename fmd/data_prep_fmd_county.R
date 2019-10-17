@@ -52,4 +52,4 @@ infected[infected==2120] <- 1
 infected[infected==0] <- NA
 infected[infected==1]
 plot(infected)
-writeRaster(infected, "G:/My Drive/EEID/Foot and Mouth Disease/states/virginia/infected.tif")
+writeRaster(infected, "G:/My Drive/EEID/Foot and Mouth Disease/states/virginia/infected.tif", overwrite = TRUE)
