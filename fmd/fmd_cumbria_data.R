@@ -19,19 +19,19 @@ end_time <- 2001
 lethal_temperature <- -35
 lethal_temperature_month <- 1
 random_seed <- 42
-reproductive_rate <- 29
+reproductive_rate <- 500
 treatments_file <- ""
 treatment_years <- c(0)
 treatment_month <- 12
 treatment_method <- "ratio"
 management <- FALSE
 mortality_on <- TRUE
-mortality_rate <- 0.75
+mortality_rate <- 0.95
 mortality_time_lag <- 9
 percent_natural_dispersal <- 1.0
 natural_kernel_type <- "cauchy"
 anthropogenic_kernel_type <- "cauchy"
-natural_distance_scale <- 99
+natural_distance_scale <- 300
 anthropogenic_distance_scale <- 0.0
 natural_dir <- "NONE"
 natural_kappa <- 0
@@ -59,9 +59,9 @@ data <- PoPS::pops(infected_file, host_file, total_plants_file,
 plot(raster(data$infected[[1]]))
 
 infected_years_file <- "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/infected_2001.tif"
-num_iterations <- 10
-start_reproductive_rate <- 100
-start_natural_distance_scale <- 40
+num_iterations <- 30
+start_reproductive_rate <- 450
+start_natural_distance_scale <- 350
 sd_reproductive_rate <- 0.2
 sd_natural_distance_scale <- 4
 number_of_cores <- 6
@@ -96,9 +96,14 @@ params_slf <- calibrate(infected_years_file, num_iterations, start_reproductive_
                         natural_dir = "NONE", natural_kappa = 0,
                         anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                         mask, success_metric)
+params_slf
+
+table(params_slf$reproductive_rate)/nrow(params_slf)*100
+table(params_slf$natural_distance_scale)/nrow(params_slf)*100
+
 
 infected_years_file <- "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/infected_2001.tif"
-num_iterations <- 10
+num_iterations <- 30
 
 infected_file <- "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/infected.tif"
 host_file <- "G:/My Drive/EEID/Foot and Mouth Disease/cumbria/host.tif"
@@ -117,7 +122,7 @@ end_time <- 2001
 lethal_temperature <- -35
 lethal_temperature_month <- 1
 random_seed <- 42
-reproductive_rate <- 29
+reproductive_rate <- 20.45
 treatments_file <- ""
 treatment_years <- c(0)
 treatment_month <- 12
@@ -129,7 +134,7 @@ mortality_time_lag <- 9
 percent_natural_dispersal <- 1.0
 natural_kernel_type <- "cauchy"
 anthropogenic_kernel_type <- "cauchy"
-natural_distance_scale <- 99
+natural_distance_scale <- 41
 anthropogenic_distance_scale <- 0.0
 natural_dir <- "NONE"
 natural_kappa <- 0
@@ -154,6 +159,7 @@ validate_slf <- validate(infected_years_file, num_iterations, number_of_cores,
                         natural_dir = "NONE", natural_kappa = 0,
                         anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                         mask, success_metric)
+validate_slf
 
 # weather_2005 <- stack("")
 # weather_2005 <- weather_2005[[157:nlayers(weather_2005)]]
